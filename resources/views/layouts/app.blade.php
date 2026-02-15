@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسک ‌پلنر حرفه‌ای شمسی</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;400;700&display=swap');
+        body { font-family: 'Vazirmatn', sans-serif; }
+
+        /* استایل‌های پایه */
+        .day-cell { min-height: 120px; transition: all 0.2s; }
+        @media (max-width: 768px) { .day-cell { min-height: auto; } }
+        .day-cell:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        body.menu-open { overflow: hidden; }
+
+        /* مخفی کردن نوار اسکرول در سایدبار */
+        aside::-webkit-scrollbar { width: 4px; }
+        aside::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.1); border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800">
+
+<div id="overlay" onclick="toggleMenu()" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity backdrop-blur-sm lg:hidden"></div>
+
+<div class="flex h-screen overflow-hidden">
+    <aside id="sidebar" class="w-72 bg-slate-900 text-white fixed inset-y-0 right-0 z-50 transform translate-x-full
+    transition-all duration-300 lg:translate-x-0 lg:static lg:flex flex-col p-4 shadow-2xl lg:shadow-none overflow-x-hidden">
+
+        <div class="flex items-center justify-between mb-8 whitespace-nowrap">
+            <div class="flex items-center gap-3 transition-all duration-300 overflow-hidden" id="logo-container">
+                <div class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 flex-shrink-0">
+                    <i class="fas fa-check-double text-white"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight menu-text opacity-100 transition-opacity duration-300">Smart Planner</span>
+            </div>
+
+            <button onclick="toggleMenu()" class="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-all">
+                <i class="fas fa-times text-xl lg:hidden"></i>
+                <i id="desktop-icon" class="fas fa-indent text-xl hidden lg:block transform transition-transform duration-300"></i>
+            </button>
+        </div>
+
+        <nav class="space-y-2 flex-1">
+            <a href="{{route('dashboard')}}" class="group flex items-center gap-3 p-3 text-slate-300 hover:bg-indigo-600 hover:text-white
+            rounded-xl transition-all whitespace-nowrap overflow-hidden {{ request()->routeIs('dashboard') ? 'bg-indigo-600 text-white' : '' }}">
+                <i class="fas fa-home w-6 flex-shrink-0 text-center transition-transform group-hover:scale-110"></i>
+                <span class="menu-text transition-opacity duration-300 font-medium">پیشخوان</span>
+            </a>
+
+            <a href="{{route('task')}}" class="group flex items-center gap-3 p-3 text-slate-300 hover:bg-indigo-600 hover:text-white
+            rounded-xl transition-all whitespace-nowrap overflow-hidden {{ request()->routeIs('task') ? 'bg-indigo-600 text-white' : '' }}">
+                <i class="fas fa-check-square w-6 flex-shrink-0 text-center transition-transform group-hover:scale-110"></i>
+                <span class="menu-text transition-opacity duration-300 font-medium">تسک</span>
+            </a>
+
+            <a href="{{route('monthly.calendar')}}" class="group flex items-center gap-3 p-3 text-slate-300 hover:bg-indigo-600 hover:text-white
+            rounded-xl transition-all whitespace-nowrap overflow-hidden {{ request()->routeIs('monthly.calendar') ? 'bg-indigo-600 text-white' : '' }}">
+                <i class="fas fa-calendar-alt w-6 flex-shrink-0 text-center transition-transform group-hover:scale-110"></i>
+                <span class="menu-text transition-opacity duration-300 font-medium">برنامه ماهانه</span>
+            </a>
+
+            <a href="{{route('reports')}}" class="group flex items-center gap-3 p-3 text-slate-300 hover:bg-indigo-600 hover:text-white
+            rounded-xl transition-all whitespace-nowrap overflow-hidden {{ request()->routeIs('reports') ? 'bg-indigo-600 text-white' : '' }}">
+                <i class="fas fa-chart-line w-6 flex-shrink-0 text-center transition-transform group-hover:scale-110"></i>
+                <span class="menu-text transition-opacity duration-300 font-medium">نمودار عملکرد</span>
+            </a>
+
+            <a href="{{route('profile')}}" class="group flex items-center gap-3 p-3 text-slate-300 hover:bg-indigo-600 hover:text-white
+            rounded-xl transition-all whitespace-nowrap overflow-hidden {{ request()->routeIs('profile') ? 'bg-indigo-600 text-white' : '' }}">
+                <i class="fas fa-user w-6 flex-shrink-0 text-center transition-transform group-hover:scale-110"></i>
+                <span class="menu-text transition-opacity duration-300 font-medium">پروفایل</span>
+            </a>
+
+            <a href="{{route('support')}}" class="group flex items-center gap-3 p-3 text-slate-300 hover:bg-indigo-600 hover:text-white
+            rounded-xl transition-all whitespace-nowrap overflow-hidden {{ request()->routeIs('support') ? 'bg-indigo-600 text-white' : '' }}">
+                <i class="fas fa-shield w-6 flex-shrink-0 text-center transition-transform group-hover:scale-110"></i>
+                <span class="menu-text transition-opacity duration-300 font-medium">پشتیبانی</span>
+            </a>
+        </nav>
+        <div class="mt-8 pt-4 border-t border-gray-700">
+            <a href="#" onclick="document.getElementById('form').submit();"
+               class="flex items-center p-3 rounded-xl bg-red-700 hover:bg-red-600 transition-all duration-200 ease-in-out text-white font-bold
+            shadow-lg shadow-red-700/50 group w-full"
+            >
+                <i class="fas fa-sign-out-alt text-lg ml-3 group-hover:scale-110 transition-transform"></i>
+                <span class="menu-text transition-opacity duration-300 font-medium">خروج </span>
+            </a>
+        </div>
+        <form action="{{route('logout')}}" method="post" id="form" style="display: none">
+            @csrf
+        </form>
+{{--        <div class="mt-auto border-t border-white/10 pt-4">--}}
+{{--            <div class="flex items-center gap-3 whitespace-nowrap overflow-hidden">--}}
+{{--                <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" class="w-9 h-9 rounded-full flex-shrink-0 border-2 border-slate-700">--}}
+{{--                <div class="flex flex-col menu-text transition-opacity duration-300">--}}
+{{--                    <span class="text-sm font-bold">برنامه‌نویس</span>--}}
+{{--                    <span class="text-xs text-slate-400">Manage Account</span>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 flex-shrink-0">
+
+            <div class="flex items-center gap-4">
+                <button onclick="toggleMenu()" class="lg:hidden text-slate-600 hover:bg-slate-100 p-2 rounded-lg">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+
+                <div class="flex flex-col">
+                    <h1 class="text-sm lg:text-base font-bold text-slate-800">{{auth()->user()->name }} عزیز خوش آمدید!</h1>
+                    <p class="text-xs text-slate-500 ">{{ \Morilog\Jalali\Jalalian::now()->format('%A، d %B Y') }}</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button class="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+                    <i class="far fa-bell text-xl"></i>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+                <div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
+                <img src="https://ui-avatars.com/api/?name={{ auth()->user()->name ?? 'User' }}&background=6366f1&color=fff"
+                     class="w-9 h-9 rounded-xl border border-slate-200 shadow-sm">
+            </div>
+        </header>
+        <div class="flex-1 overflow-y-auto bg-[#f8fafc] p-4  custom-scrollbar">
+            {{ $slot }}
+        </div>
+    </main>
+</div>
+
+<livewire:category-modal />
+<livewire:task.task-form />
+<x-alert.flash-message />
+
+<script>
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const desktopIcon = document.getElementById('desktop-icon');
+    const menuTexts = document.querySelectorAll('.menu-text');
+
+    // تابع برای اعمال وضعیت دسکتاپ (باز یا بسته)
+    function setDesktopState(collapse) {
+        if (collapse) {
+            sidebar.classList.remove('lg:w-72');
+            sidebar.classList.add('lg:w-20');
+            desktopIcon.classList.add('rotate-180');
+            menuTexts.forEach(el => el.classList.add('lg:hidden'));
+        } else {
+            sidebar.classList.remove('lg:w-20');
+            sidebar.classList.add('lg:w-72');
+            desktopIcon.classList.remove('rotate-180');
+            menuTexts.forEach(el => el.classList.remove('lg:hidden'));
+        }
+        localStorage.setItem('sidebar-collapsed', collapse);
+    }
+
+    // بارگذاری وضعیت ذخیره شده هنگام لود صفحه
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.innerWidth >= 1024) {
+            const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+            setDesktopState(isCollapsed);
+        }
+    });
+
+    function toggleMenu() {
+        if (window.innerWidth >= 1024) {
+            // منطق دسکتاپ: تغییر عرض
+            const isCurrentlyCollapsed = sidebar.classList.contains('lg:w-20');
+            setDesktopState(!isCurrentlyCollapsed);
+        } else {
+            // منطق موبایل: باز/بسته شدن کشویی
+            sidebar.classList.toggle('translate-x-full');
+            overlay.classList.toggle('hidden');
+            document.body.classList.toggle('menu-open');
+        }
+    }
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@livewireScripts
+</body>
+</html>
