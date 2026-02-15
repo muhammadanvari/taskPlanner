@@ -22,5 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // این کد به لاراول میگه در محیط پروداکشن همه چیز رو HTTPS کن
+        if (app()->environment('production')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
     }
 }
