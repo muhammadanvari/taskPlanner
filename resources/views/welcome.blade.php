@@ -56,7 +56,7 @@
             <a href="#" class="hover:text-white transition-colors">تعرفه‌ها</a>
         </div>
         <div>
-            <a href="#" class="bg-white text-dark-900 text-sm font-bold px-5 py-2 rounded-full hover:bg-slate-200 transition-colors">
+            <a href="{{ route('dashboard') }}" class="bg-white text-dark-900 text-sm font-bold px-5 py-2 rounded-full hover:bg-slate-200 transition-colors">
                 شروع رایگان
             </a>
         </div>
@@ -84,12 +84,12 @@
     </p>
 
     <div class="flex flex-col sm:flex-row gap-4">
-        <button class="px-8 py-4 rounded-full bg-indigo-600 text-white font-bold text-lg hover:bg-indigo-500 transition-all animate-glow">
+        <a href="{{ route('dashboard') }}" class="px-8 py-4 rounded-full bg-indigo-600 text-white font-bold text-lg hover:bg-indigo-500 transition-all animate-glow">
             همین حالا شروع کنید
-        </button>
-        <button class="px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-            ▶ مشاهده دمو
-        </button>
+        </a>
+{{--        <button class="px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2">--}}
+{{--            ▶ مشاهده دمو--}}
+{{--        </button>--}}
     </div>
 </section>
 

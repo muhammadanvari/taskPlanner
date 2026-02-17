@@ -41,4 +41,13 @@
         {{--        </div>--}}
 
     </form>
+
+    <div class="text-center mt-4 text-sm">
+        <p>
+            حساب کاربری ندارید؟
+            <a href="{{ route('register') }}" class="text-blue-600 hover:underline transition-colors duration-200">
+                ثبت نام
+            </a>
+        </p>
+    </div>
 @endsection
