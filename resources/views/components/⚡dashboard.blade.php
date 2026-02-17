@@ -106,7 +106,7 @@ new class extends Component {
         return $days;
     }
 
-    #[On('refresh-calendar')]
+    #[On('refresh')]
     public function refresh(){}
 };
 ?>
