@@ -46,20 +46,24 @@
 
 <div class="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl z-50">
     <nav class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-full px-6 py-3 flex justify-between items-center shadow-2xl">
+
         <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-sm">T</div>
             <span class="text-white font-bold tracking-wide">تسک‌پلنر</span>
         </div>
+
         <div class="hidden md:flex gap-8 text-sm font-medium text-slate-400">
             <a href="#" class="hover:text-white transition-colors">امکانات</a>
             <a href="#" class="hover:text-white transition-colors">یکپارچگی‌ها</a>
             <a href="#" class="hover:text-white transition-colors">تعرفه‌ها</a>
         </div>
+
         <div>
-            <a href="{{ route('dashboard') }}" class="bg-white text-dark-900 text-sm font-bold px-5 py-2 rounded-full hover:bg-slate-200 transition-colors">
+            <a href="{{ route('dashboard') }}" class="bg-white text-indigo-600 text-sm font-bold px-6 py-2.5 rounded-full shadow-sm hover:shadow-md hover:bg-indigo-50 transition-all duration-300">
                 شروع رایگان
             </a>
         </div>
+
     </nav>
 </div>
 
