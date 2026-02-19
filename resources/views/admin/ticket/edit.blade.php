@@ -41,7 +41,7 @@
                     </div>
 
                     <hr class="my-6 border-gray-200">
-                    @if($ticket->replies())
+                    @if($ticket->replies->isNotEmpty())
                         @foreach($ticket->replies as $reply)
                             <div class="mb-6">
                                 <label for="message" class="block text-gray-700 text-sm font-semibold mb-2">پاسخ</label>

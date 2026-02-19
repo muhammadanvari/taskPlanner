@@ -136,6 +136,7 @@
 </div>
 
 <livewire:category-modal />
+<livewire:support.ticket-modal />
 <livewire:task.task-form />
 <x-alert.flash-message />
 

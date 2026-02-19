@@ -2,19 +2,27 @@
 
 use App\Models\Ticket;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 new class extends Component {
+
     #[Computed]
     public function tickets()
     {
-        return Ticket::where('user_id', auth()->id() )->where('parent_id',null)->get();
+        return Ticket::where('user_id', auth()->id())->where('parent_id', null)->get();
     }
 
     #[Computed]
     public function ticketCount()
     {
-        return Ticket::where('user_id', auth()->id())->where('parent_id',null)->count();
+        return Ticket::where('user_id', auth()->id())->where('parent_id', null)->count();
+    }
+
+    #[On('refresh')]
+    public function refresh()
+    {
+
     }
 };
 ?>
@@ -40,7 +48,7 @@ new class extends Component {
         <x-support.widgets/>
 
         <!-- سوالات متداول -->
-{{--        <x-support.fqa/>--}}
+        {{--        <x-support.fqa/>--}}
 
         <!-- بخش تیکت ها !-->
         <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-2xl overflow-hidden">
@@ -57,8 +65,9 @@ new class extends Component {
                 </div>
 
                 <!-- دکمه ایجاد تیکت جدید -->
-                <button
-                    class="w-full mb-6 bg-white text-indigo-600 hover:bg-slate-100 font-bold py-3 px-4 rounded-xl transition duration-300 flex items-center justify-center group">
+                <button wire:click="$dispatchTo('support.ticket-modal','open-modal')"
+                        class="w-full mb-6 bg-white text-indigo-600 hover:bg-slate-100 font-bold py-3 px-4 rounded-xl
+                    transition duration-300 flex items-center justify-center group cursor-pointer">
                     <i class="fas fa-plus-circle ml-2 group-hover:scale-110 transition-transform"></i>
                     ایجاد تیکت پشتیبانی جدید
                 </button>
@@ -83,16 +92,18 @@ new class extends Component {
                                     <td class="py-3">{{$ticket->subject}}</td>
                                     <td class="py-3">
                                         @if($ticket->status == 'closed')
-                                        <span class="px-3 py-1 bg-green-500/30 text-green-300 rounded-full text-xs">پاسخ داده شده</span>
+                                            <span class="px-3 py-1 bg-green-500/30 text-green-300 rounded-full text-xs">پاسخ داده شده</span>
                                         @elseif($ticket->status == 'in_progress')
-                                        <span class="px-3 py-1 bg-blue-500/30 text-blue-300 rounded-full text-xs">در حال بررسی</span>
+                                            <span class="px-3 py-1 bg-blue-500/30 text-blue-300 rounded-full text-xs">در حال بررسی</span>
                                         @elseif($ticket->status == 'open')
-                                        <span class="px-3 py-1 bg-yellow-500/30 text-yellow-300 rounded-full text-xs">در انتظار پاسخ</span>
+                                            <span
+                                                class="px-3 py-1 bg-yellow-500/30 text-yellow-300 rounded-full text-xs">در انتظار پاسخ</span>
                                         @endif
                                     </td>
                                     <td class="py-3 text-sm">{{\Morilog\Jalali\Jalalian::fromCarbon($ticket->created_at)->format('Y/m/d')}}</td>
                                     <td class="py-3">
-                                        <button class="text-indigo-200 hover:text-white transition">
+                                        <button wire:click="$dispatchTo('support.ticket-modal','open-modal',{ ticket: {{ $ticket->id }} })"
+                                            class="text-indigo-200 hover:text-white transition">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </td>
@@ -115,7 +126,7 @@ new class extends Component {
         </div>
 
         <!-- تماس با پشتیبانی -->
-{{--        <x-support.contact/>--}}
+        {{--        <x-support.contact/>--}}
     </div>
 </div>
 
