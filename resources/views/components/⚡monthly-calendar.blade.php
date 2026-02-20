@@ -9,6 +9,14 @@ use Morilog\Jalali\Jalalian;
 new class extends Component {
     use HasJalaliCalendar;
 
+    public $colorsMap = [
+        'slate'   => '#64748b', 'red'     => '#ef4444', 'orange'  => '#f97316',
+        'amber'   => '#f59e0b', 'yellow'  => '#eab308', 'lime'    => '#84cc16',
+        'green'   => '#22c55e', 'emerald' => '#10b981', 'teal'    => '#14b8a6',
+        'cyan'    => '#06b6d4', 'sky'     => '#0ea5e9', 'blue'    => '#3b82f6',
+        'indigo'  => '#6366f1', 'violet'  => '#8b5cf6', 'purple'  => '#a855f7',
+        'fuchsia' => '#d946ef', 'pink'    => '#ec4899', 'rose'    => '#f43f5e'
+    ];
     // این متد خیلی مهم است. اگر نباشد، متغیرها null می‌مانند
     public function mount()
     {
@@ -158,7 +166,8 @@ new class extends Component {
                     @foreach($day['tasks'] as $task)
                         <div
                             wire:key="task-{{ $task->id }}"
-                            class="group/task flex items-center justify-between gap-1 bg-{{$task->category->color ?? 'red'}}-200 px-2 py-1 rounded-md text-[13px] font-medium transition-all"
+                            class="group/task flex items-center justify-between gap-1 px-2 py-1 rounded-md text-[13px] font-medium transition-all"
+                            style="background-color: {{ $colorsMap[$task->category?->color] ?? '#cbd5e1' }}66"
                         >
                             <div class="flex items-center gap-1 truncate">
                                 <input type="checkbox"
