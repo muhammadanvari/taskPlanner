@@ -249,12 +249,12 @@ new class extends Component {
                                             {{-- Time Badge (NEW) --}}
                                             @if($task->start_time)
                                                 <div class="flex items-center gap-1.5 text-[10px] text-slate-500 px-2 py-1 rounded-md bg-slate-50 border border-slate-100" dir="ltr">
-                                <span class="font-mono font-bold">
-                                    {{ \Carbon\Carbon::parse($task->start_time)->format('H:i') }}
-                                    @if($task->end_time)
-                                        - {{ \Carbon\Carbon::parse($task->end_time)->format('H:i') }}
-                                    @endif
-                                </span>
+                                                    <span class="font-mono font-bold">
+                                                        {{ \Carbon\Carbon::parse($task->start_time)->format('H:i') }}
+                                                        @if($task->end_time)
+                                                            - {{ \Carbon\Carbon::parse($task->end_time)->format('H:i') }}
+                                                        @endif
+                                                    </span>
                                                     <i class="far fa-clock text-slate-400 text-[9px]"></i>
                                                 </div>
                                             @endif
@@ -262,9 +262,11 @@ new class extends Component {
                                             {{-- Category Badge --}}
                                             @if($task->category)
                                                 <span class="text-[10px] flex items-center gap-1 bg-{{$task->category->color}}-50 text-{{$task->category->color}}-600 px-2 py-1 rounded-full border border-{{$task->category->color}}-100 ml-auto sm:ml-0">
-                                <span class="w-1.5 h-1.5 rounded-full bg-{{$task->category->color}}-500"></span>
-                                {{ $task->category->name }}
-                            </span>
+                                                    <span class="w-1.5 h-1.5 rounded-full"
+                                                          style="background-color: {{ $colorsMap[$task->category?->color] ?? '#cbd5e1' }}66"
+                                                    ></span>
+                                                    {{ $task->category->name }}
+                                                </span>
                                             @endif
                                         </div>
                                     </div>

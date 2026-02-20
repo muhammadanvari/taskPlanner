@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Task;
+use App\Models\Category; // اضافه شدن مدل دسته‌بندی
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Morilog\Jalali\Jalalian;
@@ -64,22 +65,15 @@ new class extends Component {
             };
         }
 
-        // --- ۵. نمودار تایم‌لاین روزانه (Daily Schedule - NEW) ---
-        // تسک‌های امروز که ساعت شروع و پایان دارند
-        // نکته: فرض بر این است که فرمت تاریخ در دیتابیس میلادی (date/datetime) است
-        // اگر تاریخ شمسی ذخیره میکنید باید تبدیل کنید. اینجا فرض بر استاندارد لاراول (میلادی) است.
-
+        // --- ۵. نمودار تایم‌لاین روزانه (اصلاح شده) ---
         $timelineTasks = Task::where('user_id', $userId)
-            ->whereDate('due_date', Carbon::today()) // فقط کارهای امروز
+            ->whereDate('due_date', Carbon::today())
             ->whereNotNull('start_time')
             ->whereNotNull('end_time')
             ->orderBy('start_time')
             ->get()
             ->map(function ($task) {
-                // ساختن Timestamp دقیق برای Chart.js
-                // تاریخ امروز + ساعت ذخیره شده
                 $dateStr = Carbon::parse($task->due_date)->format('Y-m-d');
-
                 $start = Carbon::parse($dateStr . ' ' . $task->start_time)->timestamp * 1000;
                 $end = Carbon::parse($dateStr . ' ' . $task->end_time)->timestamp * 1000;
 
@@ -91,6 +85,29 @@ new class extends Component {
                 ];
             });
 
+        // محدوده‌های ثابت برای تایم لاین (مثلا از ۶ صبح تا ۱۲ شب)
+        $timelineBounds = [
+            'start' => Carbon::today()->addHours(6)->timestamp * 1000,
+            'end' => Carbon::today()->endOfDay()->timestamp * 1000,
+        ];
+
+        // --- ۶. نمودار دسته‌بندی‌ها (NEW) ---
+        // فرض بر این است که مدل Category وجود دارد و با Task رابطه دارد
+        $categoriesRaw = Category::withCount([
+            'tasks as total_tasks' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            },
+            'tasks as completed_tasks' => function ($query) use ($userId) {
+                $query->where('user_id', $userId)->where('status', 'completed');
+            }
+        ])->having('total_tasks', '>', 0)->get();
+
+        $categoriesData = [
+            'labels' => $categoriesRaw->pluck('name')->toArray(),
+            'total' => $categoriesRaw->pluck('total_tasks')->toArray(),
+            'completed' => $categoriesRaw->pluck('completed_tasks')->toArray(),
+        ];
+
         // --- آمار کلی ---
         $totalTasks = $completedCount + $pendingCount + $overdueCount;
         $completionRate = $totalTasks > 0 ? round(($completedCount / $totalTasks) * 100) : 0;
@@ -101,7 +118,9 @@ new class extends Component {
             'status' => ['completed' => $completedCount, 'pending' => $pendingCount, 'overdue' => $overdueCount],
             'weekly_performance' => $daysOfWeekData,
             'time_distribution' => array_values($timeRanges),
-            'timeline' => $timelineTasks, // داده جدید تایم‌لاین
+            'timeline' => $timelineTasks,
+            'timeline_bounds' => $timelineBounds,
+            'categories' => $categoriesData, // داده‌های جدید
             'completion_rate' => $completionRate,
             'total_tasks' => $totalTasks
         ];
@@ -118,6 +137,7 @@ new class extends Component {
             this.renderBarChart();
             this.renderRadarChart();
             this.renderTimelineChart();
+            this.renderCategoryChart(); // فراخوانی چارت جدید
         },
 
         renderTrendChart() {
@@ -235,23 +255,61 @@ new class extends Component {
             });
         },
 
-        // 5. Timeline Chart (Daily Schedule - NEW)
+        // چارت جدید دسته‌بندی‌ها
+        renderCategoryChart() {
+            const ctx = document.getElementById('categoryChart');
+            if(!ctx) return;
+
+            // اگر دسته‌بندی وجود نداشت
+            if(this.stats.categories.labels.length === 0) return;
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: this.stats.categories.labels,
+                    datasets: [
+                        {
+                            label: 'انجام شده',
+                            data: this.stats.categories.completed,
+                            backgroundColor: '#10b981', // سبز
+                            borderRadius: 4,
+                            barPercentage: 0.7,
+                        },
+                        {
+                            label: 'کل تسک‌ها',
+                            data: this.stats.categories.total,
+                            backgroundColor: '#cbd5e1', // خاکستری روشن
+                            borderRadius: 4,
+                            barPercentage: 0.7,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', align: 'end', labels: { boxWidth: 12, usePointStyle: true } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [4, 4] }, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        },
+
+        // اصلاح شده: Timeline Chart
         renderTimelineChart() {
             const ctx = document.getElementById('timelineChart');
             if(!ctx) return;
 
             const tasks = this.stats.timeline;
-
-            // اگر تسکی برای امروز نیست
-            if(!tasks || tasks.length === 0) {
-                // میتوانید اینجا منطقی بنویسید که نمودار خالی نشان ندهد
-                // اما فعلا Chart.js هندل میکند
-            }
+            if(!tasks || tasks.length === 0) return;
 
             const dataPoints = tasks.map(t => [t.start, t.end]);
             const labels = tasks.map(t => t.name);
             const backgroundColors = tasks.map(t =>
-                t.status === 'completed' ? '#10b981' : '#3b82f6' // سبز یا آبی
+                t.status === 'completed' ? '#10b981' : '#3b82f6'
             );
 
             new Chart(ctx, {
@@ -263,12 +321,12 @@ new class extends Component {
                         data: dataPoints,
                         backgroundColor: backgroundColors,
                         borderWidth: 0,
-                        barPercentage: 0.6,
+                        barPercentage: 0.5,
                         borderRadius: 4,
                     }]
                 },
                 options: {
-                    indexAxis: 'y', // افقی کردن نمودار
+                    indexAxis: 'y', // افقی کردن
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
@@ -276,7 +334,6 @@ new class extends Component {
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    // تبدیل تایم‌استمپ به ساعت خوانا
                                     const start = new Date(context.raw[0]).toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'});
                                     const end = new Date(context.raw[1]).toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'});
                                     return `${start} تا ${end}`;
@@ -287,15 +344,17 @@ new class extends Component {
                     scales: {
                         x: {
                             position: 'top',
-                            type: 'linear', // چون دیتا تایم‌استمپ است
+                            type: 'linear',
+                            // اضافه کردن Min و Max ثابت برای نمایش منطقی‌تر روز
+                            min: this.stats.timeline_bounds.start,
+                            max: this.stats.timeline_bounds.end,
                             ticks: {
+                                stepSize: 3600000 * 2, // نمایش هر ۲ ساعت
                                 callback: function(value) {
-                                    // نمایش ساعت روی محور افقی
                                     return new Date(value).toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'});
                                 },
                                 maxRotation: 0,
-                                autoSkip: true,
-                                maxTicksLimit: 6
+                                autoSkip: true
                             },
                             grid: { borderDash: [2, 2] }
                         },
@@ -318,10 +377,10 @@ new class extends Component {
         </div>
     </div>
 
-    {{-- Grid Layout --}}
+    {{-- Grid Layout (ردیف‌بندی جدید برای ۶ چارت) --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        {{-- 1. TREND CHART --}}
+        {{-- 1. TREND CHART (ردیف اول) --}}
         <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <i class="fas fa-chart-line text-indigo-500"></i> روند ۳۰ روز اخیر
@@ -331,7 +390,7 @@ new class extends Component {
             </div>
         </div>
 
-        {{-- 2. STATUS CHART --}}
+        {{-- 2. STATUS CHART (ردیف اول) --}}
         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
             <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <i class="fas fa-chart-pie text-emerald-500"></i> وضعیت کلی
@@ -350,45 +409,34 @@ new class extends Component {
             </div>
         </div>
 
-        {{-- 3. BAR CHART --}}
+        {{-- 6. CATEGORY CHART (ردیف دوم - چارت جدید) --}}
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-layer-group text-purple-500"></i> عملکرد بر اساس دسته‌بندی
+            </h3>
+            @if(count($this->stats['categories']['labels']) > 0)
+                <div class="relative h-64 w-full">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            @else
+                <div class="h-64 flex flex-col items-center justify-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    <span class="text-sm">هنوز دسته‌بندی ثبت نشده است.</span>
+                </div>
+            @endif
+        </div>
+
+        {{-- 3. BAR CHART (ردیف دوم) --}}
         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <i class="fas fa-calendar-week text-blue-500"></i> عملکرد هفتگی
             </h3>
-            <p class="text-xs text-slate-400 mb-4">فعالیت بر اساس روزهای هفته</p>
-            <div class="relative h-64 w-full">
+            <div class="relative h-64 w-full mt-6">
                 <canvas id="barChart"></canvas>
             </div>
         </div>
 
-        {{-- 4. RADAR CHART --}}
+        {{-- 5. TIMELINE CHART (ردیف سوم - فضای بیشتر برای خوانایی) --}}
         <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-slate-700 flex items-center gap-2">
-                    <i class="fas fa-crosshairs text-pink-500"></i> رادار تمرکز زمانی
-                </h3>
-            </div>
-            <div class="flex flex-col sm:flex-row items-center gap-8">
-                <div class="relative h-64 w-full sm:w-1/2">
-                    <canvas id="radarChart"></canvas>
-                </div>
-                <div class="w-full sm:w-1/2 space-y-4">
-                    @php
-                        $times = $this->stats['time_distribution'];
-                        $labels = ['صبح', 'ظهر', 'عصر', 'شب'];
-                        $max = max($times);
-                        $maxIndex = array_search($max, $times);
-                    @endphp
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <span class="text-xs text-slate-500 block mb-1">اوج فعالیت:</span>
-                        <span class="text-lg font-bold text-slate-800">{{ $max > 0 ? $labels[$maxIndex] : '-' }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- 5. TIMELINE CHART (Daily Schedule) --}}
-        <div class="lg:col-span-3 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm mt-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-slate-700 flex items-center gap-2">
                     <i class="far fa-clock text-blue-500"></i> برنامه امروز
@@ -403,11 +451,33 @@ new class extends Component {
                     <canvas id="timelineChart"></canvas>
                 </div>
             @else
-                <div class="h-32 flex flex-col items-center justify-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <div class="h-64 flex flex-col items-center justify-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                     <i class="far fa-calendar-times text-2xl mb-2"></i>
                     <span class="text-sm">برای امروز هیچ تسک زمان‌داری ثبت نشده است.</span>
                 </div>
             @endif
+        </div>
+
+        {{-- 4. RADAR CHART (ردیف سوم) --}}
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                    <i class="fas fa-crosshairs text-pink-500"></i> رادار تمرکز
+                </h3>
+            </div>
+            <div class="relative h-48 flex-1 w-full">
+                <canvas id="radarChart"></canvas>
+            </div>
+            @php
+                $times = $this->stats['time_distribution'];
+                $labels = ['صبح', 'ظهر', 'عصر', 'شب'];
+                $max = max($times);
+                $maxIndex = array_search($max, $times);
+            @endphp
+            <div class="mt-4 bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                <span class="text-xs text-slate-500">اوج فعالیت: </span>
+                <span class="text-sm font-bold text-slate-800">{{ $max > 0 ? $labels[$maxIndex] : '-' }}</span>
+            </div>
         </div>
 
     </div>
