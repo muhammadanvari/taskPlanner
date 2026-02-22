@@ -314,7 +314,7 @@ new class extends Component {
                             <input type="time" wire:model="start_time"
                                    class="w-full bg-slate-50 border border-slate-100 hover:border-indigo-300 focus:border-indigo-500 focus:bg-white
                                    rounded-xl px-3 py-3 text-sm text-slate-700 font-medium outline-none transition shadow-sm placeholder-slate-400 ltr-input">
-                            <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+                            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
                                 <i class="far fa-clock text-xs"></i>
                             </div>
                         </div>
@@ -326,7 +326,7 @@ new class extends Component {
                             <input type="time" wire:model="end_time"
                                    class="w-full bg-slate-50 border border-slate-100 hover:border-indigo-300 focus:border-indigo-500 focus:bg-white
                                    rounded-xl px-3 py-3 text-sm text-slate-700 font-medium outline-none transition shadow-sm placeholder-slate-400 ltr-input">
-                            <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+                            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
                                 <i class="fas fa-history text-xs"></i>
                             </div>
                         </div>

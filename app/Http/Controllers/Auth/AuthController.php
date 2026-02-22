@@ -23,6 +23,9 @@ class AuthController extends Controller
         ]);
         if (auth()->attempt($credentials)) {
             $request->session()->regenerate();
+            auth()->user()->update([
+                'last_activity' => \Illuminate\Support\now(),
+            ]);
             return redirect()->intended('/');
         }
         return back()->withErrors([

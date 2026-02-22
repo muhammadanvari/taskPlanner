@@ -34,6 +34,7 @@
                     <th class="py-4 px-4">نام</th>
                     <th class="py-4 px-4">ایمیل</th>
                     <th class="py-4 px-4">تاریخ عضویت</th>
+                    <th class="py-4 px-4">آخرین فعالیت</th>
                     <th class="py-4 px-4 rounded-l-xl text-center">عملیات</th>
                 </tr>
                 </thead>
@@ -47,8 +48,13 @@
                         </td>
                         <td class="py-4 px-4 text-gray-600">{{ $user->email }}</td>
                         <td class="py-4 px-4 text-gray-500 text-sm">
-                            <span class="bg-gray-200 text-gray-700 py-1 px-3 rounded-full">
-                                {{ $user->created_at->format('Y/m/d') }}
+                            <span class="bg-indigo-100 text-gray-700 py-1 px-3 rounded-full">
+                                {{ \Morilog\Jalali\Jalalian::fromCarbon($user->created_at)->format('Y/m/d') }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 text-gray-500 text-sm">
+                            <span class="bg-indigo-100 text-gray-700 py-1 px-3 rounded-full">
+                                {{$user->last_activity ? \Morilog\Jalali\Jalalian::fromCarbon($user->last_activity)->format('Y/m/d') : 'اخیرا فعالیت نداشته'}}
                             </span>
                         </td>
                         <td class="py-4 px-4 text-center">
