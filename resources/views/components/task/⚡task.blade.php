@@ -67,6 +67,19 @@ new class extends Component {
     }
 
     #[Computed]
+    public function delayedTasks()
+    {
+        return $this->getFilteredQuery()
+            ->where('status', 'pending')
+            ->whereBetween('due_date', [
+                Jalalian::now()->toCarbon()->startOfMonth(),
+                Jalalian::now()->subDay()->toCarbon()
+            ])
+            ->orderBy('due_date', 'ASC')
+            ->get();
+    }
+
+    #[Computed]
     public function completedTasks()
     {
         // تسک‌های انجام شده (مرتب شده بر اساس زمان انجام)
@@ -279,7 +292,99 @@ new class extends Component {
                         <p class="text-slate-400 text-sm">همه کارها انجام شده! 🎉</p>
                     </div>
                 @endif
+                    @if($this->delayedTasks->isNotEmpty())
+                        <div x-data="{ expanded: true }">
 
+                            <div @click="expanded = !expanded"
+                                 class="flex items-center justify-between mb-3 px-1 cursor-pointer select-none group">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-5 flex items-center justify-center transition-transform duration-200"
+                                         :class="expanded ? 'rotate-0' : 'rotate-90'">
+                                        <i class="fas fa-chevron-down text-xs text-slate-400 group-hover:text-indigo-500"></i>
+                                    </div>
+
+                                    <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">تاخیر افتاده</span>
+                                    <span class="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-bold">
+                {{ $this->delayedTasks->count() }}
+            </span>
+                                </div>
+                                <div class="h-px bg-slate-100 flex-1 mr-4 transition-all"
+                                     :class="expanded ? 'opacity-0' : 'opacity-100'"></div>
+                            </div>
+
+                            <div x-show="expanded"
+                                 x-collapse
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 -translate-y-2"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 class="space-y-3">
+
+                                @foreach($this->delayedTasks as $task)
+                                    <div wire:key="pending-{{ $task->id }}"
+                                         class="group flex items-center gap-3 p-3.5 border border-slate-100 bg-white hover:border-indigo-200 hover:shadow-md rounded-2xl transition-all duration-200 cursor-pointer">
+
+                                        {{-- Checkbox --}}
+                                        <label class="relative flex items-center cursor-pointer p-1">
+                                            <input type="checkbox" wire:click="toggleStatus({{ $task->id }})" class="peer sr-only">
+                                            <div class="w-6 h-6 border-2 border-slate-300 rounded-lg transition-all hover:border-indigo-400 peer-checked:bg-indigo-500 peer-checked:border-indigo-500 flex items-center justify-center">
+                                                <i class="fas fa-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+                                            </div>
+                                        </label>
+
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-start justify-between">
+                                                <p class="text-slate-800 text-sm font-bold truncate ml-2">{{ $task->title }}</p>
+
+                                                <div class="flex items-center gap-1 transition-opacity duration-200 shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100">
+                                                    <button wire:click="$dispatchTo('task.task-form','open-modal', { task: {{ $task->id }} })"
+                                                            class="text-slate-400 hover:text-indigo-600 p-1">
+                                                        <i class="fas fa-pen text-xs"></i>
+                                                    </button>
+                                                    <button wire:click="deleteTask({{ $task->id }})"
+                                                            class="text-slate-400 hover:text-red-500 p-1">
+                                                        <i class="fas fa-trash text-xs"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {{-- Footer Info: Date, Time, Category --}}
+                                            <div class="flex flex-wrap items-center gap-2 mt-2">
+
+                                                {{-- Date Badge --}}
+                                                <div class="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-md bg-slate-50 border border-slate-100 {{ $task->due_date < now() ? 'text-red-500 font-bold bg-red-50 border-red-100' : 'text-slate-500' }}">
+                                                    <i class="far fa-calendar-alt"></i>
+                                                    <span>{{ \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($task->due_date))->format('%A، %d %B') }}</span>
+                                                </div>
+
+                                                {{-- Time Badge (NEW) --}}
+                                                @if($task->start_time)
+                                                    <div class="flex items-center gap-1.5 text-[10px] text-slate-500 px-2 py-1 rounded-md bg-slate-50 border border-slate-100" dir="ltr">
+                                                    <span class="font-mono font-bold">
+                                                        {{ \Carbon\Carbon::parse($task->start_time)->format('H:i') }}
+                                                        @if($task->end_time)
+                                                            - {{ \Carbon\Carbon::parse($task->end_time)->format('H:i') }}
+                                                        @endif
+                                                    </span>
+                                                        <i class="far fa-clock text-slate-400 text-[9px]"></i>
+                                                    </div>
+                                                @endif
+
+                                                {{-- Category Badge --}}
+                                                @if($task->category)
+                                                    <span class="text-[10px] flex items-center gap-1 bg-{{$task->category->color}}-50 text-{{$task->category->color}}-600 px-2 py-1 rounded-full border border-{{$task->category->color}}-100 ml-auto sm:ml-0">
+                                                    <span class="w-1.5 h-1.5 rounded-full"
+                                                          style="background-color: {{ $colorsMap[$task->category?->color] ?? '#cbd5e1' }}66"
+                                                    ></span>
+                                                    {{ $task->category->name }}
+                                                </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 @if($this->completedTasks->isNotEmpty())
                     <div x-data="{ expanded: false }" class="pt-4 border-t border-slate-100">
 
