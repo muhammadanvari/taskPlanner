@@ -21,7 +21,7 @@ class AuthController extends Controller
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
-        if (auth()->attempt($credentials)) {
+        if (auth()->attempt($credentials , $request->remember)) {
             $request->session()->regenerate();
             auth()->user()->update([
                 'last_activity' => \Illuminate\Support\now(),
