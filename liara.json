@@ -1,5 +1,11 @@
 {
     "laravel": {
         "phpVersion": "8.2"
-    }
+    },
+    "disks": [
+        {
+            "name": "sqlite-data",
+            "mountTo": "db"
+        }
+    ]
 }
