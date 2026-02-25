@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Task;
-use App\Models\Category; // اضافه شدن مدل دسته‌بندی
+use App\Models\Category;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Morilog\Jalali\Jalalian;
@@ -32,40 +32,40 @@ new class extends Component {
         $pendingCount = Task::where('user_id', $userId)->where('status', 'pending')->where('due_date', '>=', now())->count();
         $overdueCount = Task::where('user_id', $userId)->where('status', 'pending')->where('due_date', '<', now())->count();
 
-        // --- ۳. نمودار میله‌ای (Weekly) ---
-        $weeklyRaw = Task::where('user_id', $userId)
+        // دریافت تاریخ‌های بروزرسانی تسک‌های تکمیل شده برای استفاده در نمودارهای ۳ و ۴
+        $completedDates = Task::where('user_id', $userId)
             ->where('status', 'completed')
-            ->select(DB::raw('DAYOFWEEK(updated_at) as day_idx'), DB::raw('count(*) as total'))
-            ->groupBy('day_idx')
-            ->pluck('total', 'day_idx')
-            ->toArray();
+            ->pluck('updated_at');
+
+        // --- ۳. نمودار میله‌ای (Weekly) ---
+        $weeklyCounts = $completedDates->countBy(function ($date) {
+            return Carbon::parse($date)->dayOfWeek;
+        });
 
         $daysOfWeekData = [
-            $weeklyRaw[7] ?? 0, // شنبه
-            $weeklyRaw[1] ?? 0, // یکشنبه
-            $weeklyRaw[2] ?? 0, // دوشنبه
-            $weeklyRaw[3] ?? 0, // سه‌شنبه
-            $weeklyRaw[4] ?? 0, // چهارشنبه
-            $weeklyRaw[5] ?? 0, // پنجشنبه
-            $weeklyRaw[6] ?? 0, // جمعه
+            $weeklyCounts[6] ?? 0, // شنبه
+            $weeklyCounts[0] ?? 0, // یکشنبه
+            $weeklyCounts[1] ?? 0, // دوشنبه
+            $weeklyCounts[2] ?? 0, // سه‌شنبه
+            $weeklyCounts[3] ?? 0, // چهارشنبه
+            $weeklyCounts[4] ?? 0, // پنجشنبه
+            $weeklyCounts[5] ?? 0, // جمعه
         ];
 
         // --- ۴. نمودار راداری (Hours) ---
-        $hoursRaw = Task::where('user_id', $userId)
-            ->where('status', 'completed')
-            ->select(DB::raw('HOUR(updated_at) as hour'))
-            ->get();
         $timeRanges = ['morning' => 0, 'afternoon' => 0, 'evening' => 0, 'night' => 0];
-        foreach ($hoursRaw as $task) {
+
+        foreach ($completedDates as $date) {
+            $hour = Carbon::parse($date)->hour;
             match (true) {
-                $task->hour >= 6 && $task->hour < 12 => $timeRanges['morning']++,
-                $task->hour >= 12 && $task->hour < 18 => $timeRanges['afternoon']++,
-                $task->hour >= 18 && $task->hour <= 23 => $timeRanges['evening']++,
+                $hour >= 6 && $hour < 12 => $timeRanges['morning']++,
+                $hour >= 12 && $hour < 18 => $timeRanges['afternoon']++,
+                $hour >= 18 && $hour <= 23 => $timeRanges['evening']++,
                 default => $timeRanges['night']++,
             };
         }
 
-        // --- ۵. نمودار تایم‌لاین روزانه (اصلاح شده) ---
+        // --- ۵. نمودار تایم‌لاین روزانه ---
         $timelineTasks = Task::where('user_id', $userId)
             ->whereDate('due_date', Carbon::today())
             ->whereNotNull('start_time')
@@ -92,7 +92,7 @@ new class extends Component {
         ];
 
         // --- ۶. نمودار دسته‌بندی‌ها (NEW) ---
-        // فرض بر این است که مدل Category وجود دارد و با Task رابطه دارد
+        // --- ۶. نمودار دسته‌بندی‌ها (NEW) سازگار با SQLite ---
         $categoriesRaw = Category::withCount([
             'tasks as total_tasks' => function ($query) use ($userId) {
                 $query->where('user_id', $userId);
@@ -100,7 +100,12 @@ new class extends Component {
             'tasks as completed_tasks' => function ($query) use ($userId) {
                 $query->where('user_id', $userId)->where('status', 'completed');
             }
-        ])->having('total_tasks', '>', 0)->get();
+        ])
+            // جایگزینی having با whereHas برای فیلتر کردن دسته‌بندی‌های بدون تسک
+            ->whereHas('tasks', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->get();
 
         $categoriesData = [
             'labels' => $categoriesRaw->pluck('name')->toArray(),
@@ -120,7 +125,7 @@ new class extends Component {
             'time_distribution' => array_values($timeRanges),
             'timeline' => $timelineTasks,
             'timeline_bounds' => $timelineBounds,
-            'categories' => $categoriesData, // داده‌های جدید
+            'categories' => $categoriesData,
             'completion_rate' => $completionRate,
             'total_tasks' => $totalTasks
         ];
@@ -137,7 +142,7 @@ new class extends Component {
             this.renderBarChart();
             this.renderRadarChart();
             this.renderTimelineChart();
-            this.renderCategoryChart(); // فراخوانی چارت جدید
+            this.renderCategoryChart();
         },
 
         renderTrendChart() {
@@ -255,12 +260,10 @@ new class extends Component {
             });
         },
 
-        // چارت جدید دسته‌بندی‌ها
         renderCategoryChart() {
             const ctx = document.getElementById('categoryChart');
             if(!ctx) return;
 
-            // اگر دسته‌بندی وجود نداشت
             if(this.stats.categories.labels.length === 0) return;
 
             new Chart(ctx, {
@@ -271,14 +274,14 @@ new class extends Component {
                         {
                             label: 'انجام شده',
                             data: this.stats.categories.completed,
-                            backgroundColor: '#10b981', // سبز
+                            backgroundColor: '#10b981',
                             borderRadius: 4,
                             barPercentage: 0.7,
                         },
                         {
                             label: 'کل تسک‌ها',
                             data: this.stats.categories.total,
-                            backgroundColor: '#cbd5e1', // خاکستری روشن
+                            backgroundColor: '#cbd5e1',
                             borderRadius: 4,
                             barPercentage: 0.7,
                         }
@@ -298,7 +301,6 @@ new class extends Component {
             });
         },
 
-        // اصلاح شده: Timeline Chart
         renderTimelineChart() {
             const ctx = document.getElementById('timelineChart');
             if(!ctx) return;
@@ -326,7 +328,7 @@ new class extends Component {
                     }]
                 },
                 options: {
-                    indexAxis: 'y', // افقی کردن
+                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
@@ -345,11 +347,10 @@ new class extends Component {
                         x: {
                             position: 'top',
                             type: 'linear',
-                            // اضافه کردن Min و Max ثابت برای نمایش منطقی‌تر روز
                             min: this.stats.timeline_bounds.start,
                             max: this.stats.timeline_bounds.end,
                             ticks: {
-                                stepSize: 3600000 * 2, // نمایش هر ۲ ساعت
+                                stepSize: 3600000 * 2,
                                 callback: function(value) {
                                     return new Date(value).toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'});
                                 },
@@ -377,10 +378,10 @@ new class extends Component {
         </div>
     </div>
 
-    {{-- Grid Layout (ردیف‌بندی جدید برای ۶ چارت) --}}
+    {{-- Grid Layout --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        {{-- 1. TREND CHART (ردیف اول) --}}
+        {{-- 1. TREND CHART --}}
         <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <i class="fas fa-chart-line text-indigo-500"></i> روند ۳۰ روز اخیر
@@ -390,7 +391,7 @@ new class extends Component {
             </div>
         </div>
 
-        {{-- 2. STATUS CHART (ردیف اول) --}}
+        {{-- 2. STATUS CHART --}}
         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
             <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <i class="fas fa-chart-pie text-emerald-500"></i> وضعیت کلی
@@ -409,7 +410,7 @@ new class extends Component {
             </div>
         </div>
 
-        {{-- 6. CATEGORY CHART (ردیف دوم - چارت جدید) --}}
+        {{-- 6. CATEGORY CHART --}}
         <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <i class="fas fa-layer-group text-purple-500"></i> عملکرد بر اساس دسته‌بندی
@@ -425,7 +426,7 @@ new class extends Component {
             @endif
         </div>
 
-        {{-- 3. BAR CHART (ردیف دوم) --}}
+        {{-- 3. BAR CHART --}}
         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <i class="fas fa-calendar-week text-blue-500"></i> عملکرد هفتگی
@@ -435,7 +436,7 @@ new class extends Component {
             </div>
         </div>
 
-        {{-- 5. TIMELINE CHART (ردیف سوم - فضای بیشتر برای خوانایی) --}}
+        {{-- 5. TIMELINE CHART --}}
         <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-slate-700 flex items-center gap-2">
@@ -458,7 +459,7 @@ new class extends Component {
             @endif
         </div>
 
-        {{-- 4. RADAR CHART (ردیف سوم) --}}
+        {{-- 4. RADAR CHART --}}
         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-slate-700 flex items-center gap-2">
