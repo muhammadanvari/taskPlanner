@@ -172,7 +172,7 @@ new class extends Component {
         {{-- Header --}}
         <div class="bg-slate-800 px-6 py-5 text-white flex justify-between items-center rounded-t-[2rem]">
             <div>
-                <h2 class="text-lg font-bold">{{ $taskId ? 'ویرایش فعالیت' : 'فعالیت جدید' }}</h2>
+                <h2 class="text-lg font-bold">{{ $title }}</h2>
                 <p class="text-indigo-100 text-xs mt-0.5">
                     {{ $taskId ? 'ویرایش جزئیات تسک' : 'ثبت سریع تسک در تقویم' }}
                 </p>

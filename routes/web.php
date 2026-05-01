@@ -8,18 +8,26 @@ use App\Http\Controllers\Admin\TicketController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
+use Livewire\Form;
 
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('test', function () {
+    return view('test');
+});
+Route::get('/blog', [\App\Http\Controllers\BlogController::class, 'index'])->name('blog');
+Route::get('/blog/{blog}', [\App\Http\Controllers\BlogController::class, 'single'])->name('blog.single');
 
 Route::middleware('auth')->group(function () {
     Route::livewire('/dashboard', 'dashboard')->name('dashboard');
-    Route::livewire('/monthly-calendar', 'monthly-calendar')->name('monthly.calendar');
-    Route::livewire('/reports', 'reports')->name('reports');
+    Route::livewire('/monthly', 'monthly-calendar')->name('monthly.calendar');
+    Route::livewire('/reports', 'charts.reports')->name('reports');
+    Route::livewire('/timeline', 'timeline')->name('timeline');
     Route::livewire('/profile', 'profile')->name('profile');
     Route::livewire('/support', 'support.support')->name('support');
     Route::livewire('/task', 'task.task')->name('task');
+    Route::livewire('/task/form', 'task.form')->name('task.form');
 
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/',[DashboardController::class, 'index']);

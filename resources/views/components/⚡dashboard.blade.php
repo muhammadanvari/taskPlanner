@@ -118,13 +118,15 @@ new class extends Component {
                 داشبورد
             </h1>
         </div>
-        <button
-            wire:click="$dispatchTo('task.task-form','open-modal', { date: '{{Jalalian::now()->format('Y/m/d')}}' })"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-200 transition flex items-center gap-2 font-medium w-full md:w-auto justify-center"
-        >
-            <i class="fas fa-plus"></i>
-            تسک جدید
-        </button>
+        <a href="{{ route('task.form') }}">
+            <button
+                {{--            wire:click="$dispatchTo('task.task-form','open-modal', { date: '{{Jalalian::now()->format('Y/m/d')}}' })"--}}
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-200 transition flex items-center gap-2 font-medium w-full md:w-auto justify-center"
+            >
+                <i class="fas fa-plus"></i>
+                تسک جدید
+            </button>
+        </a>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div

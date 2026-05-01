@@ -18,7 +18,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|string|email',
+            'phone' => 'required',
             'password' => 'required|string',
         ]);
         if (auth()->attempt($credentials , $request->remember)) {
@@ -29,7 +29,7 @@ class AuthController extends Controller
             return redirect()->intended('/');
         }
         return back()->withErrors([
-            'email' => 'اطلاعات وارد شده صحیح نمیباشد.',
+            'phone' => 'اطلاعات وارد شده صحیح نمیباشد.',
         ]);
     }
 
@@ -42,12 +42,14 @@ class AuthController extends Controller
     {
         $credentials = $request->validate([
             'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
+//            'email' => 'string|email|unique:users',
+            'phone' => 'required|string|unique:users',
             'password' => 'required|string',
         ]);
         User::create([
             'name' => $credentials['name'],
-            'email' => $credentials['email'],
+//            'email' => $credentials['email'],
+            'phone' => $credentials['phone'],
             'password' => Hash::make($credentials['password']),
         ]);
         return redirect()->intended('/login');

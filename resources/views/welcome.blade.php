@@ -3,201 +3,514 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسک‌پلنر | نسل جدید مدیریت کارها</title>
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.0.0/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <title>{{ setting('site_title') }}</title>
     @vite(['resources/js/app.js','resources/css/app.css'])
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Vazirmatn', 'sans-serif'] },
-                    colors: {
-                        dark: {
-                            900: '#050505',
-                            800: '#121212',
-                            700: '#1f1f1f',
-                        },
-                        accent: {
-                            500: '#6366f1', // Indigo
-                            400: '#818cf8',
-                            glow: '#4f46e580'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        /* پس‌زمینه مش با گرادیانت محو */
-        .bg-mesh {
-            background-color: #050505;
-            background-image: radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-            radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+        body { font-family: 'Vazirmatn', sans-serif; }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
         }
-        /* انیمیشن درخشش ملایم */
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
-            50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.5); }
+        .animate-float { animation: float 5s ease-in-out infinite; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         }
-        .animate-glow { animation: pulse-glow 3s infinite; }
+
+        /* منوی موبایل به صورت dropdown از بالا به پایین */
+        .mobile-dropdown {
+            position: fixed;
+            top: 80px; /* ارتفاع نوبار */
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            border-bottom: 1px solid #e2e8f0;
+            z-index: 40;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease-in-out;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .mobile-dropdown.open {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 35;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            visibility: hidden;
+            top: 80px;
+        }
+
+        .mobile-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* انیمیشن برای آیتم‌های منو */
+        .mobile-dropdown a {
+            transform: translateX(0);
+            transition: all 0.2s ease;
+        }
+
+        .mobile-dropdown a:active {
+            transform: translateX(-5px);
+        }
     </style>
 </head>
-<body class="font-sans text-slate-300 bg-mesh antialiased min-h-screen selection:bg-accent-500/30 selection:text-white overflow-x-hidden">
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-600 selection:text-white overflow-x-hidden">
 
-<div class="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl z-50">
-    <nav class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-full px-6 py-3 flex justify-between items-center shadow-2xl">
+<!-- Navbar -->
+<nav class="fixed w-full z-50 transition-all duration-300 glass-effect">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+            <!-- Logo -->
+            <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/40">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <span class="font-bold text-2xl text-slate-900 tracking-tight">{{ setting('site_title') }}</span>
+            </div>
 
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-sm">T</div>
-            <span class="text-white font-bold tracking-wide">تسک‌پلنر</span>
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#features" class="text-slate-600 hover:text-indigo-600 font-medium transition-colors">امکانات</a>
+                <a href="#pricing" class="text-slate-600 hover:text-indigo-600 font-medium transition-colors">تعرفه‌ها</a>
+                <a href="{{url('/blog')}}" class="text-slate-600 hover:text-indigo-600 font-medium transition-colors">بلاگ</a>
+            </div>
+
+            <!-- Desktop CTA Buttons -->
+            <div class="hidden md:flex items-center gap-4">
+                <a href="{{ route('dashboard') }}" class="text-slate-600 hover:text-indigo-600 font-medium px-4 py-2 transition-colors">ورود</a>
+                <a href="{{ route('register') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transform hover:-translate-y-0.5">ثبت‌نام رایگان</a>
+            </div>
+
+            <!-- Mobile menu button -->
+            <div class="md:hidden flex items-center">
+                <button id="mobileMenuBtn" class="text-slate-600 hover:text-indigo-600 focus:outline-none transition-transform duration-200">
+                    <svg id="menuIcon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <svg id="closeIcon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Dropdown Menu (از بالا به پایین) -->
+<div id="mobileOverlay" class="mobile-overlay"></div>
+<div id="mobileDropdown" class="mobile-dropdown">
+    <div class="px-4 py-6 space-y-6">
+        <!-- Navigation Links -->
+        <div class="flex flex-col gap-2">
+            <a href="#features" class="flex items-center justify-between py-3 px-4 text-slate-700 hover:text-indigo-600
+            hover:bg-indigo-50 rounded-xl font-medium transition-all border border-slate-100">
+                <span>امکانات</span>
+            </a>
+            <a href="#pricing" class="flex items-center justify-between py-3 px-4 text-slate-700 hover:text-indigo-600
+            hover:bg-indigo-50 rounded-xl font-medium transition-all border border-slate-100">
+                <span>تعرفه‌ها</span>
+            </a>
+            <a href="{{url('/blog')}}" class="flex items-center justify-between py-3 px-4 text-slate-700 hover:text-indigo-600
+            hover:bg-indigo-50 rounded-xl font-medium transition-all border border-slate-100">
+                <span>بلاگ</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Hero Section  -->
+<section class="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
+    <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-indigo-600/10 blur-3xl opacity-60 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl opacity-60 pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="text-right">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold text-sm mb-6 border border-indigo-100">
+                    <span class="flex h-2.5 w-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
+                    نسخه ۱.۰ منتشر شد!
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-[1.3] mb-6">
+                    مدیریت زمان و تسک‌ها، <br/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">هوشمندانه‌تر از همیشه</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl leading-relaxed">
+                    با Smart Planner بهره‌وری خود را به اوج برسانید. برنامه‌ریزی روزانه، دسته‌بندی تسک‌ها و مشاهده نمودار عملکرد در یک محیط زیبا، مدرن و کارآمد.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="/register" class="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 transform hover:-translate-y-1">
+                        شروع کنید - رایگان
+                        <svg class="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    </a>
+{{--                    <a href="#dashboard" class="flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 px-8 py-4 rounded-2xl font-bold text-lg transition-all hover:border-indigo-200">--}}
+{{--                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>--}}
+{{--                        مشاهده محیط پنل--}}
+{{--                    </a>--}}
+                </div>
+
+                <div class="mt-10 flex items-center gap-4 text-sm text-slate-500">
+                    <div class="flex -space-x-3 space-x-reverse">
+                        <div class="w-10 h-10 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs z-30">ع‌م</div>
+                        <div class="w-10 h-10 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs z-20">س‌ت</div>
+                        <div class="w-10 h-10 rounded-full border-2 border-white bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-xs z-10">پ‌ر</div>
+                        <div class="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-slate-600 text-xs font-bold z-0">+1k</div>
+                    </div>
+                    <p>مورد اعتماد بیش از <span class="font-bold text-slate-800">۱,۰۰۰</span> کاربر فعال</p>
+                </div>
+            </div>
+
+            <!-- Dashboard Mockup -->
+            <div class="relative lg:mr-10 animate-float mt-12 lg:mt-0 hidden md:block" id="dashboard">
+                <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-blue-400 rounded-3xl transform rotate-3 opacity-20 shadow-2xl"></div>
+                <div class="relative bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col h-full">
+                    <div class="bg-slate-50 border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+                        <div class="flex gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                        </div>
+                        <div class="text-xs font-bold text-slate-400">Smart Planner App</div>
+                    </div>
+                    <div class="p-6 flex flex-col gap-5 bg-slate-50/50">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                    </div>
+                                    <h4 class="text-slate-500 text-sm font-bold">کل تسک‌ها</h4>
+                                </div>
+                                <p class="text-2xl font-black text-slate-800">۲۴</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <h4 class="text-slate-500 text-sm font-bold">انجام شده</h4>
+                                </div>
+                                <p class="text-2xl font-black text-slate-800">۱۸</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                            <h4 class="font-bold text-slate-800 mb-4 text-sm">تسک‌های امروز</h4>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-5 h-5 rounded border-2 border-indigo-500 cursor-pointer"></div>
+                                        <span class="text-slate-700 text-sm font-medium">طراحی صفحه لندینگ</span>
+                                    </div>
+                                    <span class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded-md font-bold">مهم</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-5 h-5 rounded border-2 border-slate-300 bg-slate-200 flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        </div>
+                                        <span class="text-slate-400 text-sm font-medium line-through">توسعه API کاربری</span>
+                                    </div>
+                                    <span class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-1 rounded-md font-bold">تکمیل</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-24 bg-white relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-indigo-600 font-bold tracking-wide mb-3 text-sm bg-indigo-50 border border-indigo-100 inline-block px-4 py-1.5 rounded-full">امکانات سیستم</h2>
+            <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6">هر آنچه برای مدیریت نیاز دارید</h3>
+            <p class="text-lg text-slate-500 leading-relaxed">ابزارهای ساده اما قدرتمند برای دسته‌بندی کارها، مدیریت زمان و مشاهده روند پیشرفت پروژه‌های شما.</p>
         </div>
 
-        <div class="hidden md:flex gap-8 text-sm font-medium text-slate-400">
-            <a href="#" class="hover:text-white transition-colors">امکانات</a>
-            <a href="#" class="hover:text-white transition-colors">یکپارچگی‌ها</a>
-            <a href="#" class="hover:text-white transition-colors">تعرفه‌ها</a>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-xl hover:border-indigo-200 transition-all duration-300 transform hover:-translate-y-1">
+                <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                </div>
+                <h4 class="text-xl font-bold text-slate-900 mb-3">مدیریت آسان تسک‌ها</h4>
+                <p class="text-slate-500 leading-relaxed text-sm">تسک‌های جدید اضافه کنید، وضعیت آن‌ها را تغییر دهید و اولویت‌بندی کنید. همه‌چیز در یک نگاه قابل مشاهده است.</p>
+            </div>
+            <!-- Feature 2 -->
+            <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-xl hover:border-indigo-200 transition-all duration-300 transform hover:-translate-y-1">
+                <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                </div>
+                <h4 class="text-xl font-bold text-slate-900 mb-3">گزارش و نمودار</h4>
+                <p class="text-slate-500 leading-relaxed text-sm">عملکرد خود را با نمودارهای گرافیکی بررسی کنید. ببینید در طول ماه چقدر پیشرفت داشته‌اید.</p>
+            </div>
+            <!-- Feature 3 -->
+            <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-xl hover:border-indigo-200 transition-all duration-300 transform hover:-translate-y-1">
+                <div class="w-14 h-14 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h4 class="text-xl font-bold text-slate-900 mb-3">زمان‌بندی هوشمند</h4>
+                <p class="text-slate-500 leading-relaxed text-sm">برای کارهای خود مهلت زمانی (Deadline) تعیین کنید تا هرگز کارهای مهم را فراموش نکنید.</p>
+            </div>
         </div>
+    </div>
+</section>
 
-        <div>
-            <a href="{{ route('dashboard') }}" class="bg-white text-indigo-600 text-sm font-bold px-6 py-2.5 rounded-full shadow-sm hover:shadow-md hover:bg-indigo-50 transition-all duration-300">
-                شروع رایگان
+<!-- Pricing Section -->
+<section id="pricing" class="py-20 bg-slate-50 overflow-hidden relative">
+    <div class="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
+            <div class="w-full lg:w-1/2 text-center lg:text-right">
+                <span class="text-indigo-600 font-bold tracking-wide mb-4 text-sm bg-indigo-100 border border-indigo-200 inline-block px-4 py-1.5 rounded-full">تعرفه اشتراک</span>
+                <h3 class="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-6 leading-tight">سرمایه‌گذاری روی<br/>بهره‌وری تیم شما</h3>
+                <p class="text-lg text-slate-600 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
+                    ما به جای پلن‌های پیچیده، تمام امکانات سیستم را در یک پکیج کامل با قیمتی منصفانه ارائه می‌دهیم. بدون هیچ ریسکی، یک ماه اول را کاملاً رایگان استفاده کنید.
+                </p>
+                <div class="flex flex-col gap-4 text-slate-700 font-medium">
+                    <div class="flex items-center gap-3 justify-center lg:justify-start">
+                        <div class="bg-white p-1 rounded-full shadow-sm">
+                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        لغو اشتراک در هر زمان به سادگی
+                    </div>
+                    <div class="flex items-center gap-3 justify-center lg:justify-start">
+                        <div class="bg-white p-1 rounded-full shadow-sm">
+                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        بدون نیاز به کارت بانکی برای تست رایگان
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full max-w-md lg:w-[380px] shrink-0">
+                <div class="bg-white rounded-3xl p-6 border-2 border-indigo-600 shadow-2xl shadow-indigo-600/20 relative">
+                    <div class="absolute -top-4 right-1/2 translate-x-1/2 bg-indigo-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-600/40 flex items-center gap-2 whitespace-nowrap">
+                        <svg class="w-5 h-5 text-indigo-200" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        ۳۰ روز اول کاملاً رایگان
+                    </div>
+                    <div class="text-center mt-6 mb-8">
+                        <h4 class="text-2xl font-extrabold text-slate-900">اشتراک ویژه</h4>
+                        <p class="text-slate-500 mt-2">دسترسی نامحدود به تمامی امکانات</p>
+                    </div>
+                    <div class="mb-8 text-center bg-indigo-50/50 rounded-2xl py-6 border border-indigo-50">
+                        <span class="text-5xl font-black text-indigo-600">۴۹,۰۰۰</span>
+                        <span class="text-slate-600 text-base font-medium block mt-2">تومان / ماهانه</span>
+                    </div>
+                    <ul class="space-y-5 mb-8 text-right px-2">
+                        <li class="flex items-center gap-3 text-slate-700 font-medium">
+                            <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            تسک‌ها و پروژه‌های نامحدود
+                        </li>
+                        <li class="flex items-center gap-3 text-slate-700 font-medium">
+                            <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            گزارش‌گیری و نمودارهای پیشرفته
+                        </li>
+                        <li class="flex items-center gap-3 text-slate-700 font-medium">
+                            <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            پشتیبانی اولویت‌دار و سریع
+                        </li>
+                    </ul>
+                    <a href="/register" class="flex items-center justify-center w-full py-4 px-4 rounded-xl bg-indigo-600 text-white font-bold text-lg hover:bg-indigo-700 shadow-lg shadow-indigo-600/30 transition-all transform hover:-translate-y-1">
+                        شروع تست رایگان
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Blog Section -->
+<section id="blog" class="py-24 bg-white relative border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="flex justify-between items-end mb-12">
+            <div class="max-w-2xl">
+                <h2 class="text-indigo-600 font-bold tracking-wide mb-3 text-sm bg-indigo-50 border border-indigo-100 inline-block px-4 py-1.5 rounded-full">بلاگ و آموزش</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">آخرین مقالات بهره‌وری</h3>
+            </div>
+            <a href="/blog" class="hidden md:flex items-center gap-2 text-indigo-600 font-bold hover:text-indigo-800 transition-colors">
+                مشاهده همه
+                <svg class="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
         </div>
 
-    </nav>
-</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Blog Post 1 -->
+            <div class="bg-slate-50 rounded-3xl overflow-hidden border border-slate-100 hover:shadow-xl hover:border-indigo-100 transition-all duration-300 group cursor-pointer">
+                <!-- Image Placeholder (Gradient) -->
+                <div class="h-48 bg-gradient-to-br from-indigo-100 via-blue-50 to-slate-200 flex items-center justify-center relative overflow-hidden">
+                    <svg class="w-16 h-16 text-indigo-200 transform group-hover:scale-110 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div class="p-6">
+                    <div class="text-sm text-slate-400 mb-2 font-medium">۲۰ فروردین ۱۴۰۵</div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors">تکنیک پومودورو: راز تمرکز عمیق</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-4">چگونه با استفاده از بازه‌های زمانی ۲۵ دقیقه‌ای، بهره‌وری خود را در طول روز دو برابر کنیم؟ در این مقاله به بررسی...</p>
+                    <span class="text-indigo-600 font-bold text-sm flex items-center gap-1">مطالعه مقاله <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg></span>
+                </div>
+            </div>
 
-<section class="pt-40 pb-20 px-6 flex flex-col items-center text-center relative z-10">
-    <div class="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-slate-300 backdrop-blur-sm">
-            <span class="flex h-2 w-2 relative">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-            </span>
-        هوش مصنوعی به تسک‌پلنر اضافه شد
-    </div>
+            <!-- Blog Post 2 -->
+            <div class="bg-slate-50 rounded-3xl overflow-hidden border border-slate-100 hover:shadow-xl hover:border-indigo-100 transition-all duration-300 group cursor-pointer">
+                <!-- Image Placeholder (Gradient) -->
+                <div class="h-48 bg-gradient-to-br from-emerald-100 via-teal-50 to-slate-200 flex items-center justify-center relative overflow-hidden">
+                    <svg class="w-16 h-16 text-emerald-200 transform group-hover:scale-110 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                </div>
+                <div class="p-6">
+                    <div class="text-sm text-slate-400 mb-2 font-medium">۱۵ فروردین ۱۴۰۵</div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors">چگونه لیست تسک‌های روزانه بنویسیم؟</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-4">نوشتن یک To-Do List اشتباه می‌تواند باعث استرس بیشتر شود. بیاموزید چگونه وظایف خود را اصولی اولویت‌بندی کنید.</p>
+                    <span class="text-indigo-600 font-bold text-sm flex items-center gap-1">مطالعه مقاله <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg></span>
+                </div>
+            </div>
 
-    <h1 class="text-5xl md:text-7xl font-black text-white tracking-tight mb-8 leading-[1.1] max-w-4xl">
-        تمرکز عمیق، <br>
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
-                خروجی بی‌نهایت.
-            </span>
-    </h1>
-
-    <p class="text-lg md:text-xl text-slate-400 max-w-2xl mb-12 font-medium leading-relaxed">
-        ابزاری طراحی شده برای تیم‌های پیشرو. پروژه‌ها را مدیریت کنید، زمان را پیگیری کنید و با سرعتی که تا به حال تجربه نکرده‌اید، کارها را به اتمام برسانید.
-    </p>
-
-    <div class="flex flex-col sm:flex-row gap-4">
-        <a href="{{ route('dashboard') }}" class="px-8 py-4 rounded-full bg-indigo-600 text-white font-bold text-lg hover:bg-indigo-500 transition-all animate-glow">
-            همین حالا شروع کنید
-        </a>
-{{--        <button class="px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2">--}}
-{{--            ▶ مشاهده دمو--}}
-{{--        </button>--}}
-    </div>
-</section>
-
-<section class="px-6 pb-32 relative z-10 flex justify-center">
-    <div class="w-full max-w-5xl rounded-3xl bg-dark-800/50 backdrop-blur-2xl border border-white/10 shadow-[0_0_80px_rgba(99,102,241,0.15)] overflow-hidden">
-        <div class="h-12 border-b border-white/10 bg-white/5 flex items-center px-4 gap-2">
-            <div class="w-3 h-3 rounded-full bg-slate-700"></div>
-            <div class="w-3 h-3 rounded-full bg-slate-700"></div>
-            <div class="w-3 h-3 rounded-full bg-slate-700"></div>
+            <!-- Blog Post 3 -->
+            <div class="bg-slate-50 rounded-3xl overflow-hidden border border-slate-100 hover:shadow-xl hover:border-indigo-100 transition-all duration-300 group cursor-pointer hidden md:block">
+                <!-- Image Placeholder (Gradient) -->
+                <div class="h-48 bg-gradient-to-br from-orange-100 via-yellow-50 to-slate-200 flex items-center justify-center relative overflow-hidden">
+                    <svg class="w-16 h-16 text-orange-200 transform group-hover:scale-110 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <div class="p-6">
+                    <div class="text-sm text-slate-400 mb-2 font-medium">۱۰ فروردین ۱۴۰۵</div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors">غلبه بر اهمال‌کاری در ۳ قدم ساده</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-4">به تعویق انداختن کارها دشمن شماره یک موفقیت است. با این تکنیک‌های روانشناسی، همین امروز دست به کار شوید.</p>
+                    <span class="text-indigo-600 font-bold text-sm flex items-center gap-1">مطالعه مقاله <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg></span>
+                </div>
+            </div>
         </div>
 
-        <div class="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="hidden md:flex flex-col gap-4 border-l border-white/10 pl-6">
-                <div class="h-8 w-24 bg-white/10 rounded-md"></div>
-                <div class="h-6 w-full bg-white/5 rounded-md mt-4"></div>
-                <div class="h-6 w-3/4 bg-white/5 rounded-md"></div>
-                <div class="h-6 w-5/6 bg-white/5 rounded-md"></div>
-            </div>
-
-            <div class="col-span-2 flex flex-col gap-4">
-                <div class="text-xl font-bold text-white mb-2">کارهای امروز</div>
-
-                <div class="group p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-indigo-500/50 transition-all flex items-center justify-between cursor-pointer">
-                    <div class="flex items-center gap-4">
-                        <div class="w-6 h-6 rounded-full border-2 border-indigo-500/50 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors"></div>
-                        <span class="text-white font-medium">بازنویسی کدهای لندینگ پیج</span>
-                    </div>
-                    <span class="text-xs px-2 py-1 rounded-md bg-indigo-500/20 text-indigo-300">طراحی</span>
-                </div>
-
-                <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center">
-                            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                        </div>
-                        <span class="text-white font-medium">جلسه با تیم مارکتینگ</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-indigo-300 font-mono">24:59</span>
-                        <span class="text-xl">🍅</span>
-                    </div>
-                </div>
-
-                <div class="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between opacity-50">
-                    <div class="flex items-center gap-4">
-                        <div class="w-6 h-6 rounded-full bg-slate-600 flex items-center justify-center text-xs text-white">✓</div>
-                        <span class="text-slate-400 font-medium line-through">ارسال ایمیل آپدیت</span>
-                    </div>
-                </div>
-            </div>
+        <!-- Mobile View All Button -->
+        <div class="mt-8 text-center md:hidden">
+            <a href="/blog" class="inline-flex items-center justify-center gap-2 text-indigo-600 font-bold bg-indigo-50 px-6 py-3 rounded-xl hover:bg-indigo-100 w-full transition-colors">
+                مشاهده همه مقالات
+                <svg class="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </a>
         </div>
     </div>
 </section>
 
-<section class="max-w-6xl mx-auto px-6 pb-32">
-    <h2 class="text-3xl md:text-5xl font-black text-white text-center mb-16">طراحی شده برای کمال‌گرایان</h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        <div class="md:col-span-2 bg-dark-800 rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-colors relative overflow-hidden group">
-            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <h3 class="text-2xl font-bold text-white mb-3">تایم‌لاین قدرتمند</h3>
-            <p class="text-slate-400 mb-6">پروژه‌های پیچیده را با نمای گانت (Gantt) و تقویم یکپارچه، مثل یک پازل ساده حل کنید.</p>
-            <div class="w-full h-32 bg-dark-900 rounded-xl border border-white/5 relative overflow-hidden flex flex-col justify-center gap-3 p-4">
-                <div class="h-4 bg-indigo-500/40 rounded-full w-3/4 transform -translate-x-4"></div>
-                <div class="h-4 bg-purple-500/40 rounded-full w-1/2 transform translate-x-8"></div>
-                <div class="h-4 bg-pink-500/40 rounded-full w-2/3"></div>
-            </div>
-        </div>
-
-        <div class="bg-dark-800 rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-colors relative overflow-hidden">
-            <div class="text-4xl mb-4">⏱️</div>
-            <h3 class="text-xl font-bold text-white mb-2">تایمر درونی</h3>
-            <p class="text-slate-400 text-sm">تکنیک پومودورو مستقیماً روی هر تسک متصل شده است.</p>
-        </div>
-
-        <div class="bg-dark-800 rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-colors relative overflow-hidden">
-            <div class="text-4xl mb-4">🧠</div>
-            <h3 class="text-xl font-bold text-white mb-2">دستیار هوشمند</h3>
-            <p class="text-slate-400 text-sm">هوش مصنوعی، کارهای بزرگ را با یک کلیک به زیرتسک تبدیل می‌کند.</p>
-        </div>
-
-        <div class="md:col-span-2 bg-dark-800 rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-colors relative overflow-hidden group">
-            <div class="flex flex-col md:flex-row items-center gap-8">
-                <div class="flex-1">
-                    <h3 class="text-2xl font-bold text-white mb-3">گزارش‌های خیره‌کننده</h3>
-                    <p class="text-slate-400">نمودارهای زنده از عملکرد شما و تیمتان. ببینید زمانتان کجا صرف می‌شود.</p>
+<!-- Footer -->
+<footer class="bg-slate-900 pt-16 pb-8 border-t-4 border-indigo-600">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8 mb-12 border-b border-slate-800 pb-12">
+            <div class="flex flex-col items-center md:items-start gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <span class="font-bold text-2xl text-white">Smart Planner</span>
                 </div>
-                <div class="w-40 h-40 rounded-full border-8 border-dark-900 border-t-indigo-500 border-r-indigo-500 transform rotate-45 shadow-[0_0_30px_rgba(99,102,241,0.2)]"></div>
+                <p class="text-slate-400 max-w-xs text-center md:text-right text-sm leading-relaxed">
+                    بهترین ابزار برای برنامه‌ریزی روزانه و مدیریت تسک‌ها برای فریلنسرها و تیم‌های خلاق.
+                </p>
+            </div>
+
+            <div class="flex gap-16">
+                <div class="flex flex-col gap-3 text-center md:text-right">
+                    <h5 class="text-white font-bold mb-2">لینک‌های سریع</h5>
+                    <a href="#features" class="text-slate-400 hover:text-indigo-400 transition-colors text-sm">امکانات سیستم</a>
+                    <a href="#pricing" class="text-slate-400 hover:text-indigo-400 transition-colors text-sm">تعرفه‌های اشتراک</a>
+                    <a href="#blog" class="text-slate-400 hover:text-indigo-400 transition-colors text-sm">مجله و بلاگ</a>
+                </div>
+                <div class="flex flex-col gap-3 text-center md:text-right">
+                    <h5 class="text-white font-bold mb-2">حساب کاربری</h5>
+                    <a href="/login" class="text-slate-400 hover:text-indigo-400 transition-colors text-sm">ورود به پنل</a>
+                    <a href="/register" class="text-slate-400 hover:text-indigo-400 transition-colors text-sm">ثبت‌نام جدید</a>
+                </div>
             </div>
         </div>
 
-    </div>
-</section>
-
-<footer class="border-t border-white/10 mt-20">
-    <div class="max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div class="flex items-center gap-3 text-white font-bold text-xl">
-            <div class="w-6 h-6 rounded bg-indigo-500 flex items-center justify-center text-xs">T</div>
-            تسک‌پلنر
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-center">
+            <p class="text-slate-500 text-sm w-full">
+                © 2026 تمامی حقوق برای <span class="text-slate-300">Smart Planner</span> محفوظ است. طراحی شده با عشق و Tailwind.
+            </p>
         </div>
-        <p class="text-slate-500 text-sm">© ۲۰۲۶ تمامی حقوق محفوظ است.</p>
     </div>
 </footer>
 
+<!-- JavaScript for Mobile Dropdown Menu -->
+<script>
+    (function() {
+        const menuBtn = document.getElementById('mobileMenuBtn');
+        const dropdown = document.getElementById('mobileDropdown');
+        const overlay = document.getElementById('mobileOverlay');
+        const menuIcon = document.getElementById('menuIcon');
+        const closeIcon = document.getElementById('closeIcon');
+
+        let isOpen = false;
+
+        function openMenu() {
+            dropdown.classList.add('open');
+            overlay.classList.add('visible');
+            menuIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            isOpen = true;
+        }
+
+        function closeMenu() {
+            dropdown.classList.remove('open');
+            overlay.classList.remove('visible');
+            menuIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+            document.body.style.overflow = '';
+            isOpen = false;
+        }
+
+        function toggleMenu() {
+            if (isOpen) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        }
+
+        if (menuBtn) {
+            menuBtn.addEventListener('click', toggleMenu);
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', closeMenu);
+        }
+
+        // Close menu when clicking on any link inside dropdown
+        const dropdownLinks = dropdown.querySelectorAll('a');
+        dropdownLinks.forEach(link => {
+            link.addEventListener('click', closeMenu);
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isOpen) {
+                closeMenu();
+            }
+        });
+    })();
+</script>
 </body>
 </html>

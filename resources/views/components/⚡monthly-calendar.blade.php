@@ -174,27 +174,24 @@ new class extends Component {
                                        wire:click="toggleTask({{ $task->id }})"
                                        @checked($task->status === 'completed')
                                        class="w-3 h-3 rounded border-slate-300">
-                                <span class="{{ $task->status == 'completed' ? 'line-through opacity-50' : '' }}">
-                                    {{ $task->title }}
-                                </span>
+                                <a class="cursor-pointer" title="نمایش" wire:click="$dispatchTo('task.modal','show', { task: {{ $task->id }} })">
+                                    <span class="{{ $task->status == 'completed' ? 'line-through opacity-50' : '' }}">
+                                        {{ $task->title }}
+                                    </span>
+                                </a>
                             </div>
-                            <button
-                                wire:click="deleteTask({{ $task->id }})"
-                                wire:confirm="آیا از حذف این تسک مطمئن هستید؟"
-                                class="opacity-100 md:opacity-0 md:group-hover/task:opacity-100 text-rose-500 hover:text-rose-700 transition-opacity"
-                                title="حذف">
-                                <i class="fas fa-trash-alt text-[10px]"></i>
-                            </button>
                         </div>
                     @endforeach
                 </div>
                 <div class="h-8"></div>
-                <button
-                    wire:click="$dispatchTo('task.task-form', 'open-modal', { date: '{{ $day['fullDate'] }}' })"
-                    class="absolute bottom-2 left-2 w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center
+                <a href="{{ route('task.form', ['date'=>$day['fullDate']] ) }}" wire:navigate>
+                    <button
+{{--                        wire:click="$dispatchTo('task.task-form', 'open-modal', { date: '{{ $day['fullDate'] }}' })"--}}
+                        class="absolute bottom-2 left-2 w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center
                        md:group-hover:opacity-100 opacity-100 md:opacity-0 transition-all text-slate-400 hover:bg-indigo-500 hover:text-white">
-                    <i class="fas fa-plus text-[10px]"></i>
-                </button>
+                        <i class="fas fa-plus text-[10px]"></i>
+                    </button>
+                </a>
             </div>
         @endforeach
     </div>

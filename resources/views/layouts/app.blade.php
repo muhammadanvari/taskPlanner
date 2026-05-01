@@ -6,7 +6,8 @@
     <title>تسک ‌پلنر حرفه‌ای شمسی</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{asset('/font/FontAwesome/css/all.css')}}" rel="stylesheet">
+{{--    <link href="https://lib.arvancloud.ir/font-awesome/6.3.0/css/all.css" rel="stylesheet">--}}
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;400;700&display=swap');
         body { font-family: 'Vazirmatn', sans-serif; }
@@ -125,7 +126,7 @@
                     <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                 </button>
                 <div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
-                <img src="https://ui-avatars.com/api/?name={{ auth()->user()->name ?? 'User' }}&background=6366f1&color=fff"
+                <img src="#"
                      class="w-9 h-9 rounded-xl border border-slate-200 shadow-sm">
             </div>
         </header>
@@ -137,7 +138,7 @@
 
 <livewire:category-modal />
 <livewire:support.ticket-modal />
-<livewire:task.task-form />
+<livewire:task.modal />
 <x-alert.flash-message />
 
 <script>
@@ -184,7 +185,7 @@
     }
 
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/chartJs/chart.js"></script>
 @livewireScripts
 </body>
 </html>

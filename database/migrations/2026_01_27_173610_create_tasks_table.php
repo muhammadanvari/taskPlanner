@@ -16,10 +16,11 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
             $table->string('title');
+            $table->text('description')->nullable();
             $table->enum('status',['pending','completed'])->default('pending');
             $table->date('due_date')->index();
-            $table->time('start_time')->nullable();
-            $table->time('end_time')->nullable();
+            $table->time('time')->nullable();
+            $table->boolean('reminder')->default(false);
             $table->timestamps();
         });
     }
