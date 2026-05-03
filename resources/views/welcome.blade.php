@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ setting('site_title') }}</title>
     @vite(['resources/js/app.js','resources/css/app.css'])
+    <link rel="preload" href="/font/vazir-font-v16.1.0/Vazir.woff" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/font/vazir-font-v16.1.0/Vazir-Bold.woff" as="font" type="font/woff2" crossorigin>
     <style>
         body { font-family: 'Vazirmatn', sans-serif; }
         @keyframes float {
@@ -80,7 +82,7 @@
             <!-- Logo -->
             <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/40">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <x-icon.svg-icon name="check" class="w-6 h-6 text-white" />
                 </div>
                 <span class="font-bold text-2xl text-slate-900 tracking-tight">{{ setting('site_title') }}</span>
             </div>
@@ -101,12 +103,8 @@
             <!-- Mobile menu button -->
             <div class="md:hidden flex items-center">
                 <button id="mobileMenuBtn" class="text-slate-600 hover:text-indigo-600 focus:outline-none transition-transform duration-200">
-                    <svg id="menuIcon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                    <svg id="closeIcon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
+                    <x-icon.svg-icon name="menu" id="menuIcon" class="h-6 w-6" />
+                    <x-icon.svg-icon name="close" id="closeIcon" class="h-6 w-6 hidden" />
                 </button>
             </div>
         </div>
@@ -157,7 +155,7 @@
                 <div class="flex flex-col sm:flex-row gap-4">
                     <a href="/register" class="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 transform hover:-translate-y-1">
                         شروع کنید - رایگان
-                        <svg class="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        <x-icon.svg-icon name="arrow-left" class="w-5 h-5 rotate-180" />
                     </a>
 {{--                    <a href="#dashboard" class="flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 px-8 py-4 rounded-2xl font-bold text-lg transition-all hover:border-indigo-200">--}}
 {{--                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>--}}
@@ -193,7 +191,7 @@
                             <div class="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
                                 <div class="flex items-center gap-3 mb-2">
                                     <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                        <x-icon.svg-icon name="list" class="w-5 h-5" />
                                     </div>
                                     <h4 class="text-slate-500 text-sm font-bold">کل تسک‌ها</h4>
                                 </div>
@@ -202,7 +200,7 @@
                             <div class="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
                                 <div class="flex items-center gap-3 mb-2">
                                     <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <x-icon.svg-icon name="check" class="w-5 h-5" />
                                     </div>
                                     <h4 class="text-slate-500 text-sm font-bold">انجام شده</h4>
                                 </div>
@@ -222,7 +220,7 @@
                                 <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
                                     <div class="flex items-center gap-3">
                                         <div class="w-5 h-5 rounded border-2 border-slate-300 bg-slate-200 flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            <x-icon.svg-icon name="check" class="w-4 h-4 text-white" />
                                         </div>
                                         <span class="text-slate-400 text-sm font-medium line-through">توسعه API کاربری</span>
                                     </div>
@@ -238,7 +236,7 @@
 </section>
 
 <!-- Features Section -->
-<section id="features" class="py-24 bg-white relative">
+<section id="features" class="py-24 bg-white relative"  loading="lazy">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center max-w-3xl mx-auto mb-16">
             <h2 class="text-indigo-600 font-bold tracking-wide mb-3 text-sm bg-indigo-50 border border-indigo-100 inline-block px-4 py-1.5 rounded-full">امکانات سیستم</h2>
@@ -250,7 +248,7 @@
             <!-- Feature 1 -->
             <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-xl hover:border-indigo-200 transition-all duration-300 transform hover:-translate-y-1">
                 <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    <x-icon.svg-icon name="list" class="w-7 h-7" />
                 </div>
                 <h4 class="text-xl font-bold text-slate-900 mb-3">مدیریت آسان تسک‌ها</h4>
                 <p class="text-slate-500 leading-relaxed text-sm">تسک‌های جدید اضافه کنید، وضعیت آن‌ها را تغییر دهید و اولویت‌بندی کنید. همه‌چیز در یک نگاه قابل مشاهده است.</p>
@@ -258,7 +256,7 @@
             <!-- Feature 2 -->
             <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-xl hover:border-indigo-200 transition-all duration-300 transform hover:-translate-y-1">
                 <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                    <x-icon.svg-icon name="list" class="w-7 h-7" />
                 </div>
                 <h4 class="text-xl font-bold text-slate-900 mb-3">گزارش و نمودار</h4>
                 <p class="text-slate-500 leading-relaxed text-sm">عملکرد خود را با نمودارهای گرافیکی بررسی کنید. ببینید در طول ماه چقدر پیشرفت داشته‌اید.</p>
@@ -266,7 +264,7 @@
             <!-- Feature 3 -->
             <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-xl hover:border-indigo-200 transition-all duration-300 transform hover:-translate-y-1">
                 <div class="w-14 h-14 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <x-icon.svg-icon name="list" class="w-7 h-7" />
                 </div>
                 <h4 class="text-xl font-bold text-slate-900 mb-3">زمان‌بندی هوشمند</h4>
                 <p class="text-slate-500 leading-relaxed text-sm">برای کارهای خود مهلت زمانی (Deadline) تعیین کنید تا هرگز کارهای مهم را فراموش نکنید.</p>
@@ -276,7 +274,7 @@
 </section>
 
 <!-- Pricing Section -->
-<section id="pricing" class="py-20 bg-slate-50 overflow-hidden relative">
+<section id="pricing" class="py-20 bg-slate-50 overflow-hidden relative"  loading="lazy">
     <div class="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -290,13 +288,13 @@
                 <div class="flex flex-col gap-4 text-slate-700 font-medium">
                     <div class="flex items-center gap-3 justify-center lg:justify-start">
                         <div class="bg-white p-1 rounded-full shadow-sm">
-                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            <x-icon.svg-icon name="check" class="w-5 h-5 text-emerald-500" />
                         </div>
                         لغو اشتراک در هر زمان به سادگی
                     </div>
                     <div class="flex items-center gap-3 justify-center lg:justify-start">
                         <div class="bg-white p-1 rounded-full shadow-sm">
-                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            <x-icon.svg-icon name="check" class="w-5 h-5 text-emerald-500" />
                         </div>
                         بدون نیاز به کارت بانکی برای تست رایگان
                     </div>
@@ -306,7 +304,7 @@
             <div class="w-full max-w-md lg:w-[380px] shrink-0">
                 <div class="bg-white rounded-3xl p-6 border-2 border-indigo-600 shadow-2xl shadow-indigo-600/20 relative">
                     <div class="absolute -top-4 right-1/2 translate-x-1/2 bg-indigo-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-600/40 flex items-center gap-2 whitespace-nowrap">
-                        <svg class="w-5 h-5 text-indigo-200" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <x-icon.svg-icon name="star" class="w-5 h-5 text-indigo-200" fill="currentColor" />
                         ۳۰ روز اول کاملاً رایگان
                     </div>
                     <div class="text-center mt-6 mb-8">
@@ -320,19 +318,19 @@
                     <ul class="space-y-5 mb-8 text-right px-2">
                         <li class="flex items-center gap-3 text-slate-700 font-medium">
                             <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <x-icon.svg-icon name="check" class="w-4 h-4" />
                             </div>
                             تسک‌ها و پروژه‌های نامحدود
                         </li>
                         <li class="flex items-center gap-3 text-slate-700 font-medium">
                             <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <x-icon.svg-icon name="check" class="w-4 h-4" />
                             </div>
                             گزارش‌گیری و نمودارهای پیشرفته
                         </li>
                         <li class="flex items-center gap-3 text-slate-700 font-medium">
                             <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <x-icon.svg-icon name="check" class="w-4 h-4" />
                             </div>
                             پشتیبانی اولویت‌دار و سریع
                         </li>
@@ -347,7 +345,7 @@
 </section>
 
 <!-- Blog Section -->
-<section id="blog" class="py-24 bg-white relative border-b border-slate-100">
+<section id="blog" class="py-24 bg-white relative border-b border-slate-100"  loading="lazy">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="flex justify-between items-end mb-12">
             <div class="max-w-2xl">
@@ -356,7 +354,7 @@
             </div>
             <a href="/blog" class="hidden md:flex items-center gap-2 text-indigo-600 font-bold hover:text-indigo-800 transition-colors">
                 مشاهده همه
-                <svg class="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <x-icon.svg-icon name="arrow-left" class="w-5 h-5 rotate-180" />
             </a>
         </div>
 
@@ -408,7 +406,7 @@
         <div class="mt-8 text-center md:hidden">
             <a href="/blog" class="inline-flex items-center justify-center gap-2 text-indigo-600 font-bold bg-indigo-50 px-6 py-3 rounded-xl hover:bg-indigo-100 w-full transition-colors">
                 مشاهده همه مقالات
-                <svg class="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <x-icon.svg-icon name="arrow-left" class="w-5 h-5 rotate-180" />
             </a>
         </div>
     </div>
@@ -421,7 +419,7 @@
             <div class="flex flex-col items-center md:items-start gap-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <x-icon.svg-icon name="check" class="w-5 h-5" />
                     </div>
                     <span class="font-bold text-2xl text-white">Smart Planner</span>
                 </div>
