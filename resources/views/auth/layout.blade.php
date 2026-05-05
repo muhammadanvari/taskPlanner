@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ setting('site_title') }}</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.0.0/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
-</head>
+    <link rel="preload" href="/font/vazir-font-v16.1.0/Vazir.woff" as="font" type="font/woff2" crossorigin></head>
 <body class="bg-gradient-to-tr from-gray-900 via-[#1a1c2e] to-gray-900 min-h-screen flex items-center justify-center p-6 relative overflow-hidden text-white">
 <div class="flex flex-col gap-6 w-full max-w-md relative z-10">
     @if($errors->any())

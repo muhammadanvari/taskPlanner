@@ -7,9 +7,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     <link href="{{asset('/font/FontAwesome/css/all.css')}}" rel="stylesheet">
-{{--    <link href="https://lib.arvancloud.ir/font-awesome/6.3.0/css/all.css" rel="stylesheet">--}}
+    <link rel="preload" href="/font/vazir-font-v16.1.0/Vazir.woff" as="font" type="font/woff2" crossorigin>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;400;700&display=swap');
         body { font-family: 'Vazirmatn', sans-serif; }
 
         /* استایل‌های پایه */
